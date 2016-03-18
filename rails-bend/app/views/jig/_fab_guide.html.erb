@@ -1,0 +1,255 @@
+<script type="text/javascript">
+var guides = eval(<%= @guides.to_json.html_safe %>);
+var fg;
+$(function(){
+  fg = new FabricationGuide($('#fab-guide'), guides, $('#item-template'));
+});
+
+
+function FabricationGuide(dom, guides, item_template){
+  this.dom = dom;
+  this.guides = guides;
+  this.template = item_template;
+  this.position = 0;
+  this.guidesDOM = [];
+  this.init();
+  this.hide();
+}
+
+FabricationGuide.prototype = {
+  init: function(){
+
+    var self = this;
+    _.each(self.guides, function(el, i, arr){
+      // TYPES OF GUIDES
+      var isCheckpoint = el.guide_type == "Checkpoint";
+      var isConfirmation = el.guide_type == "Confirmation";
+      var isTimed = el.main_message.indexOf("second") > -1;
+
+      // GENERATE AND ADJUST DOM FOR GUIDES
+      var cloned = self.template.clone().attr('id', '')
+        .removeClass('template');
+      
+      cloned.find('.body-text')
+            .html(el.main_message);
+
+      if(isConfirmation) cloned.find('.checkpoint').remove();
+      if(isCheckpoint) cloned.find('.confirm').remove();
+      if(!isTimed){
+        cloned.find('.timer').remove();
+      }else{
+        cloned.find('.timer').find('button').click(function(){
+          console.log("Counting down!");
+          var countdown = cloned.find('.timer').find('input');
+          var t = new Timer(countdown.val(), countdown);
+          t.start();
+        });
+      }
+
+
+      // Interactive properties
+        // cloned.find('.checkpoint, .confirm.check').click(function(){
+        //   self.position++;
+        //   self.update();
+        // });
+        // cloned.find('.history-next').click(function(){
+        //   self.position++;
+        //   self.update();
+        //   console.log(self.position);
+        // });
+
+        // cloned.find('.history-prev').click(function(){
+        //   self.position--;
+        //   self.update();
+        //   console.log(self.position);
+        // });
+        cloned = self.interact(cloned);
+
+        self.guidesDOM.push(cloned);
+    });
+    this.update();
+    return this;
+  },
+  interact: function(el){
+    var self = this;
+    el.find('.checkpoint, .confirm.check').unbind().click(function(){
+          self.position++;
+          self.update();
+        });
+    el.find('.confirm.error').unbind().click(function(){
+      $('#debug-tool').click();
+    });
+    el.find('.history-next').unbind().click(function(){
+      self.position++;
+      self.update();
+      console.log(self.position);
+    });
+
+    el.find('.history-prev').unbind().click(function(){
+      self.position--;
+      self.update();
+      console.log(self.position);
+    });
+    return el;
+  },
+  update: function(){
+    if(this.position < 0){
+      console.log("First step");
+      this.position = 0;
+      return;
+    } else if(this.position >= guides.length){
+      this.dom.find("#steps").html($('#end-item-template').clone().removeClass('template').attr('id', ''));
+    } else{
+      console.log("Setting to ", this.guidesDOM[this.position]);
+      var stepToDisplay = this.guidesDOM[this.position];
+      if(!_.isUndefined(stepToDisplay)) stepToDisplay = this.interact(stepToDisplay);
+      this.dom.find("#steps").html(stepToDisplay);
+    }
+    return this;
+  },
+  show: function() {
+    this.dom.show();
+    return this;
+  }, 
+  hide: function() {
+    this.dom.hide();
+    return this;
+  }
+}
+</script>
+
+<style type="text/css">
+  .template{
+    display: none;
+  }
+
+  .guide-container{
+    border: #999 1px solid;
+    background: #484848;
+    border-left: 3px solid #5d5d5d;
+    border-right: none;
+    /*border-right: 3px solid #5d5d5d;*/
+    border-top: none;
+
+    padding: 4px;
+    /*padding-top: 22px;*/
+    padding-bottom: 7px;
+    z-index: 200; 
+    color: white;
+    position: absolute;
+    top: 50px;
+    right: 0px;
+    height: calc(100% - 50px);
+    overflow-y: scroll;
+  }
+  .guide-container [class^='icon-']:before {
+      display: inline-block;
+      font-family: 'Glyphter';
+      font-style: normal;
+      font-weight: normal;
+      line-height: 0.4;
+      font-size: 18pt;
+      padding-top: 0px;
+      padding-bottom: 0px;
+      position: relative;
+      top: 10px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+  }
+  /*.guide-container .row{
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }*/
+
+  .guide-container .list-group{
+    color: black;
+  }
+  .guide-container.expanded {
+    width: 50%;
+    height: 135px;
+    overflow: hidden;
+  }
+  .guide-container.expanded #steps{
+    position: absolute;
+    top: 4px;
+    width: 99%;
+  }
+    /*.guide-container.expanded #steps .list-group-item{
+      height: 125px;
+      margin-bottom: 10px;
+    }
+      .guide-container.expanded #steps .list-group-item .body-text{
+        font-size: 20px;
+      }
+      .guide-container  label{
+        font-family: "Helvetica", "Arial", sans-serif;
+        font-weight: bold;
+        color: #ddddd;
+        font-size: 6.43pt;
+        margin: 2px;
+        margin-top: -16px;
+        position: absolute;
+      }
+       .guide-container  .list-group-item{
+          background-color: rgb(93, 93, 93);
+          border-color: #4d4d4d;
+        }*/
+      /*  .guide-container  p{
+          width: 65%;
+          display: inline-block;
+        }*/
+        .timer input.form-control{
+             width: 57px;
+            float: right;
+            height: 30px;
+        }
+        .history{
+          position: absolute;
+          bottom: 3px;
+          width: 95%;
+        }
+
+  #confirm{
+    margin: -6px;
+    padding: 20px;
+    background: #333;
+  }
+  .list-group-item{
+    cursor: pointer;
+  }
+/*  .list-group-item .row{
+    padding: 0;
+    margin-bottom: -10px;
+  }*/
+  .list-group-item .title{
+    font-weight: bold;
+    margin-top: 4px;
+    font-size: 16pt;
+    /*display: inline-block;*/
+    /*vertical-align: middle;*/
+    text-align: left;
+    float: none;
+  }
+  .list-check{
+    font-size: 17pt;
+    margin-top: 4px;
+  }
+  .h2 .list-group-item{
+    background: #999;
+  }
+  .h2 .list-group-item .list-check{
+    top:  -3px;
+  }
+  b.check{
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+
+</style>
+<div id="fab-guide" class="guide-container col-xs-3 pull-right">
+  <h5 class="text-center"> INSTRUCTIONS </h5>
+  <ul class="list-group">
+   
+  </ul>
+</div>
+

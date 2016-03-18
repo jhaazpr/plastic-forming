@@ -1,0 +1,38 @@
+<style type="text/css">
+	#big-undo{
+		position: absolute;
+		bottom: 5px;
+		left: 5px;
+		z-index: 1000000;
+		padding: 20px 20px;
+    	font-size: 16px;
+    	line-height: 1.33;
+    	border-radius: 100px;
+    	height: 100px;
+    	width: 100px;
+	}
+	#big-undo:focus{
+		/*border: 3px solid #f0ad4e;*/
+		outline: none;
+	}
+	#big-undo:active{
+		background: #f0ad4e;
+	}
+	#big-undo img{
+		margin-bottom: 8px;
+		width: 60%;
+		margin-left: 20%;
+	}
+</style>
+<button id="big-undo" class="btn btn-ellustrator">
+	<img src="/undo-01.svg"/>
+	<br/>
+	UNDO
+</button>
+<script type="text/javascript">
+$(function(){
+	$("#big-undo").mousedown(function(){
+		hm.undo();
+	});
+});
+</script>

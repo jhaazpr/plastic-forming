@@ -1,0 +1,293 @@
+<script type="text/javascript">
+
+
+var files = <%= @files.to_json.html_safe %>;
+var collections; 
+
+$(function(){
+  // $('#toggle-switch').click(function(){
+  //    $(this).parents('#collection').slideUp();
+  //    $("#big-undo").animate({
+  //       bottom: "-=200"
+  //     }, 500, function() {
+  //       // Animation complete.
+  //     });
+  // });
+  collections = new Collection(files);
+  
+  collections.switchTo("Artwork");
+});
+var testC; 
+function Collection(files){
+  var materials = {};
+  // console.log(files.filenames);
+  this.path = files.path;
+  this.materials = _.groupBy(files.filenames, function(el, i, arr){
+    return el.collection;
+  });
+  this.collections = _.keys(this.materials);
+  this.main_container = $("#collection-panel");
+  this.selectorAdd();
+  this.elementAdd("Artwork")
+}
+Collection.prototype = {
+  elementAdd: function(material){
+    var scope = this;
+    // console.log(this.materials[material]);
+    var els = _.map(this.materials[material], function(el, i, arr){
+      var dom = $('<div class="responsive-container col-xs-2 col-sm-2 col-xs-2 no-select">' +
+            '<div class="dummy"></div>' +
+            '<div class="img-container no-select">' + '</div>' +
+        '</div>');
+      var img = $('<img src="' + (scope.path + el.filename) + '" alt="'+ el.title + '" title="' + el.title + '"/>');
+      
+      // dropLogic
+      // img.on('dragstart', function(event){
+      //   event.originalEvent.dataTransfer.setData("text", $(this).attr('src'));
+      // });
+
+      // Tablet click to add function
+      dom.click(function(){
+        console.log("Adding element", "/primitives/" + el.filename);
+        var position = paper.view.center.clone();
+        position.y -= 100;
+        designer.addSVG("/primitives/" + el.filename, position);
+         $('#transform-tool').click();
+      });
+
+      // var hammertime = new Hammer();
+      // hammertime.on('tap mousedown', function(ev) {
+      //     console.log(ev);
+      //     console.log("Adding element", "/primitives/" + el.filename);
+      //     var position = paper.view.center.clone();
+      //     position.y -= 100;
+      //     designer.addSVG("/primitives/" + el.filename, position);
+      //     $('#transform-tool').click();
+      // });
+
+      dom.find('.img-container').append(img);
+      return dom;
+   });
+   $(this.main_container).append(els);
+  },
+  switchTo: function(collectionName){
+    var scope = this;
+    this.main_container.children().not("#dropzone").remove();
+    this.elementAdd(collectionName);
+    $('select#collection-type').val(collectionName);
+  },
+  selectorAdd: function(){
+    var scope = this;
+    var container = $('#collection-type').on('change', function(){
+      scope.switchTo($(this).val());
+    });
+    container.html('');
+    // console.log(this.collections);
+
+    scope.options = _.map(this.collections, function(el, i, arr){
+       var dom = $('<option></option>').html(el).attr('id', i).attr('value', el.collection);
+       if(el == "Primitives")
+        dom.attr('selected', 'true');
+      return dom;
+    });
+    container.append(scope.options);
+  }
+}
+
+function dropLogic(){
+    // DROP LOGIC
+    $('#sandbox canvas').on("drop", function(event){
+      event.preventDefault();  
+      event.stopPropagation();
+      var filename = event.originalEvent.dataTransfer.getData("text");
+      var position = paper.view.viewToProject(new paper.Point(event.originalEvent.x, event.originalEvent.y));
+      
+      console.log(event.originalEvent.dataTransfer.getData("text"));
+      
+      var filetype = filename.split('.');
+      filetype = filetype[filetype.length - 1];
+
+      console.log("Dropped!", filename , position, event, filetype);
+      
+        if(filetype == "svg")
+          designer.addSVG(filename, position);
+        else if(filetype == "json")
+          designer.addJSON(filename, position);
+      }).on("dragover", function(event) {
+        event.preventDefault();  
+        event.stopPropagation();
+        $(this).addClass('dragging');
+      }).on("dragleave", function(event) {
+        event.preventDefault();  
+        event.stopPropagation();
+        $(this).removeClass('dragging');
+      });
+
+    $('img').on('dragstart', function(event){
+      event.originalEvent.dataTransfer.setData("text", $(this).attr('src'));
+    });
+  }
+</script>
+
+<div id="collection" class="no-select shadowed">
+  <div class="title">
+    <h4> Collection - <select id="collection-type">
+    </select> 
+    <span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      Press-and-Hold to ADD element </span>
+    <span id="toggle-switch" class="badge glyphicon glyphicon-remove pull-right">  </span></h4> 
+    
+  </div>
+  <div id="collection-panel">
+    <% render :partial => "dropzone" %>
+    <div class="collection-items" class="col-xs-8">
+    </div>
+  </div>
+</div>
+
+
+<style>
+#collection{
+  position: absolute;
+  background: #F1FCFE;
+  /*height: 100%;*/
+  padding-bottom: 0px;
+  padding-top: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-left: 5px;
+  /*margin-left: 9px;*/
+  border-radius: 5px;
+  bottom: 0px;
+  left: 0px;
+  background: #ddd;
+  /*height: calc(100% - 111px);*/
+  height: calc(200px);
+  width: 100%;
+  z-index: 1000000000;
+}
+#collection-panel{
+   overflow-y: scroll;
+   height: calc(100% - 61px);
+   /*height: 100%;*/
+}
+#collection.collapsed {
+  left: -22%;
+}
+#collection.collapsed .responsive-container{
+  display: none;
+}
+  #collection .title{
+    background: #484848;
+    margin-left: -5px;
+    margin-top: -10px;
+    padding: 0 6px;
+    font-family: "Helvetica", "Arial", sans-serif;
+    font-weight: bold;
+    color: #ddddd;
+    font-size: 6.43pt;
+
+  }
+  #collection .title h4{
+    text-align: left;
+    padding: 0;
+    text-transform: uppercase;
+    font-size: 14px;
+    font-family: "Helvetica", "Arial", sans-serif;
+    font-weight: bold;
+    color: #dddddd;
+    font-size: 6.43pt;
+  }
+  #collection footer{
+    width: 93%;
+    border-top: 2px solid #DDD;
+    padding-top: 10px;
+    position: absolute;
+    bottom: 0;
+    margin: 10px auto;
+  }
+
+
+.responsive-container {
+    position: relative;
+    /*border-left: 1px solid black;*/
+    /*border-top: 1px solid black;*/
+    height: 100px;
+}
+
+.dummy {
+    padding-top: 100%; /* forces 1:1 aspect ratio */
+}
+
+.img-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    text-align:center; /* Align center inline elements */
+    font: 0/0 a;
+    background: white;
+    margin-top: 5px;
+    margin-right: 5px;
+}
+.img-container:hover{
+  background: #F1F1F1;
+}
+
+.img-container:before {
+    content: ' ';
+    display: inline-block;
+    vertical-align: middle;
+    height: 100%;
+}
+
+.img-container img {
+    vertical-align: middle;
+    display: inline-block;
+    max-height: 70%;
+    max-width: 70%;
+    cursor: pointer;
+}
+.img-container img svg{
+  color: black;
+}
+#collection-type{
+   background: transparent;
+   width: 250px;
+   padding: 3px;
+  
+   line-height: 0.8;
+   border: 0;
+   color: #FFF;
+   border-radius: 0;
+   height: 34px;
+   /*-webkit-appearance: none;*/
+}
+
+
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+* {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: -moz-none;
+    -o-user-select: none;
+    user-select: none;
+}
+#toggle-switch{
+  margin-top: 5px;
+  cursor: pointer;
+}
+#collection select{
+  font-size: 10pt;
+}
+</style>

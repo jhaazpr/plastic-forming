@@ -1,0 +1,210 @@
+
+<script type="text/javascript">
+// .d8888.  .o88b. d8888b. d888888b d8888b. d888888b 
+// 88'  YP d8P  Y8 88  `8D   `88'   88  `8D `~~88~~' 
+// `8bo.   8P      88oobY'    88    88oodD'    88    
+//   `Y8b. 8b      88`8b      88    88~~~      88    
+// db   8D Y8b  d8 88 `88.   .88.   88         88    
+// `8888Y'  `Y88P' 88   YD Y888888P 88         YP    
+                                                  
+  var design = <%= @design %>;
+  var designer, sys, zoom, materials, storage, alerter, guide, debug;
+  var graph;
+
+
+  var modes = {
+    // edit: "rgb(207, 244, 255)", 
+    draw: {color: "rgb(92, 184, 92)", dom: '#save-actions, #add-library, #system-messages, #history-bar, #canvas-toolbox, #big-undo, #clear-canvas-and-history,  #circuit-toolbox'}, 
+    validate: {color:"rgb(66, 139, 202)", dom: '#debug-guide'}, 
+    make: {color:"rgb(145, 61, 136)", dom: '#fab-guide'}
+  };
+
+  var current_mode = "draw";
+  function modify(){
+    // $('#make-design, #validate-design, #draw-design').click(function(){
+      // var id = window.location.pathname.split('/');
+      // id = id[id.length - 1];
+      
+      var mode = GET().mode; //$(this).attr('data-mode');
+      var dev = GET().dev; //$(this).attr('data-mode');
+      if(_.isUndefined(dev)) $('#dev-toolbox').remove();
+      $('#interface-container').css("background", modes[mode].color);
+      console.log("mode", mode);
+      
+      for(var i in modes){
+        if(i == mode){
+          $(modes[i].dom).show(200);
+          $(modes[i].dom).show(200);
+        }else{
+          $(modes[i].dom).hide(200);
+        }
+      }
+      // if(mode == "draw"){
+        // $('#shade').fadeOut(1000);
+      // }
+      if(mode == "validate"){
+        // var val = function(){
+          graph = new Graph();
+         
+          v = new Validator(graph);
+          v.validate();
+          // $('#shade').hide();
+        // }
+        // $('#shade').delay(10, val);  
+      }
+      if(mode == "make"){
+        // var fab = function(){
+          graph = new Graph();
+          f = new FabGuide(graph);
+          f.fabricate();
+          // $('#shade').fadeOut(1000);
+          // $('#shade').hide();
+        // }
+        // $('#shade').delay(1000, fab);         
+      }
+     
+      current_mode = mode;
+     
+  }
+  $(function(){
+    attachHandlers();
+
+    sys = new SystemMessageManager($('#system-messages'));
+
+    storage = new WebStorage();
+    designer = new CircuitDesigner($("#sandbox"));
+    zoom = new Zoom(designer.paper.view.zoom, designer.paper);
+
+    hm = new HistoryManager(storage);
+    
+    // Graph.test();
+    // Graph.printIDs();
+
+    
+
+    alerter = new Alerter($('#alerter'));
+   
+   
+    modify();
+    zoom.home();
+    // zoom.home();
+  });
+
+  getActiveTool = function(){ return paper.tool.toolholder; }
+  
+  function attachHandlers(){
+  
+    
+
+    // BRUSH CONTROLS
+    $('#brush-size-increase').click(function(){
+      if(TracePathTool.BRUSH_SIZE + 1 > TracePathTool.MAX_BRUSH_SIZE){
+        sys.show("The maximum brush size ("+TracePathTool.MAX_BRUSH_SIZE+") has been reached!")
+        return;
+      }
+      TracePathTool.BRUSH_SIZE ++;
+      $("#brush-size-label").html(TracePathTool.BRUSH_SIZE);
+      sys.show("Brush size set to: " + TracePathTool.BRUSH_SIZE);
+    });  
+
+    $('#brush-size-decrease').click(function(){
+      if(TracePathTool.BRUSH_SIZE - 1  < TracePathTool.MIN_BRUSH_SIZE){
+        sys.show("The minumum brush size ("+TracePathTool.MIN_BRUSH_SIZE+") has been reached!")
+        return;
+      }
+      TracePathTool.BRUSH_SIZE --;
+      $("#brush-size-label").html(TracePathTool.BRUSH_SIZE);
+      sys.show("Brush size set to: " + TracePathTool.BRUSH_SIZE);
+    });  
+
+
+    $('#ghost').click(function(){
+      if($(this).hasClass("btn-warning"))
+        sys.log("Deghosting the artwork!");
+      else
+        sys.log("Ghosting the artwork!");
+
+      $(this).toggleClass("btn-warning");
+      designer.art_layer.ghostify();
+    });
+    $('#lock').click(function(){
+       if($(this).hasClass("btn-warning"))
+        sys.log("Unlocking the artwork. It can now be moved.");
+      else
+        sys.log("Locking the artwork.");
+      $(this).toggleClass("btn-warning");
+      ArtworkLayer.scaleable = !ArtworkLayer.scaleable;
+      ArtworkLayer.translateable = !ArtworkLayer.translateable;
+      ArtworkLayer.rotateable = !ArtworkLayer.rotateable;
+    });
+     $('#save-progress').click(function(){
+      hm.save();
+     });
+     $('#undo').click(function(){
+      hm.undo();
+      // designer.findRoot();
+     });
+     $('#redo').click(function(){
+      hm.redo();
+      // designer.nextNode();
+     });
+     $('#revert').click(function(){
+      hm.revert();
+     });
+     $('#fast-forward').click(function(){
+      hm.fast_forward();
+     });
+     $('#clear-history').click(function(){
+      hm.clear_history();
+     });      
+    
+  }
+
+
+
+
+</script>
+
+
+<!-- 
+db   db d888888b .88b  d88. db      
+88   88 `~~88~~' 88'YbdP`88 88      
+88ooo88    88    88  88  88 88      
+88~~~88    88    88  88  88 88      
+88   88    88    88  88  88 88booo. 
+YP   YP    YP    YP  YP  YP Y88888P  
+-->
+<div id="interface-container" class="row">   
+
+ 
+  <%= render :partial => "toolbox" %>
+  <div id="alert-container" class="col-xs-3 pull-right">
+    <div id="alerter" class="alert alert-danger alert-dismissible fade in" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+        <h4>Watch out!</h4>
+        <p id='message'>Change this and that and try again. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum.</p>
+        <p>
+          <button id="action" type="button" class="btn btn-xs btn-danger" data-dismiss="alert">Take this action</button>
+        </p>
+        <p>
+          <button id="auto" type="button" class="btn btn-xs btn-default">Do this for me always.</button>
+        </p>
+        <p>
+          <button id="silence" type="button" class="btn btn-xs btn-default">Don't tell me again</button>
+        </p>
+      </div>
+  </div>
+  <%= render :partial => "toolbar" %>
+  <% render :partial => "toolbox" %>
+  <%= render :partial => "debug" %>
+  <%= render :partial => "fab_guide" %>
+  <%= render :partial => "calibration_modal" %>
+  <%= render :partial => "conductivity_modal" %>
+  <%= render :partial => "system_dialog" %>
+  <%= render :partial => "thumbui"%>
+  <%= render :partial => "multimeter"%>
+  <div id="sandbox" class="col-xs-12">
+    <!-- <canvas id="sandboxy" resize></canvas> -->
+  </div>
+  <% render :partial => "sidebar" %>
+<%= render 'collection'%>

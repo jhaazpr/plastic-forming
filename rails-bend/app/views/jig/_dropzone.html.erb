@@ -1,0 +1,29 @@
+<script type="text/javascript">
+var myDropzone;
+$(function(){
+  // DROPZONE
+  Dropzone.autoDiscover = false;
+  myDropzone = new Dropzone("#svgUpload", { url: "/jig/upload"});
+  // dz = new Dropzone("#svgUpload", { url: "/jig/upload"});
+  myDropzone.on("complete", function(file) {
+    console.log("uploaded")
+    console.log(file);
+    $.getJSON("/jig/primitives", function(data){files = data;
+      collections = new Collection(files);
+      collections.switchTo("Uploads");
+    });
+  });
+
+  // END DROPZONE
+});
+</script>
+
+<div id='dropzone' class="col-xs-4">
+  <br>
+  <%= form_tag({action: :upload}, multipart: true, enctype: "multipart/form-data", :id=> "svgUpload", :class=> "dropzone") do %>
+    <div class="fallback">
+      <input name="file" type="file" multiple />
+    </div>
+  <% end %>
+  <br>
+</div>

@@ -1,0 +1,97 @@
+<style>
+  #conductivity-help{
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    display: none;
+    z-index: 1000000;
+  }
+</style>
+
+
+<button id="conductivity-help" type="button" class="btn btn-primary btn-md" data-toggle="modal" data-target="#conductiveModal">
+  <strong>Help!</strong> My resistance is not the same.
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="conductiveModal" tabindex="-1" role="dialog" aria-labelledby="conductiveModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="conductiveModal">Techniques for Adjusting the Conductivity of a Trace </h4>
+      </div>
+      <div class="modal-body">
+            <label> Do you need to... </label>
+            <div>
+              <!-- Nav tabs -->
+              <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#lower-r" aria-controls="higher-r" role="tab" data-toggle="tab"><%= glyph "arrow-up"%></span> HIGHER Ω </a>
+                </li>
+                <li role="presentation">
+                    <a href="#higher-r" aria-controls="lower-r" role="tab" data-toggle="tab"><%= glyph "arrow-down"%></span> LOWER Ω</a>
+                </li>
+
+              </ul>
+
+              <!-- Tab panes -->
+              <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="lower-r">
+                    <h4>How to Lower Resistance</h4>
+                        <p>The most common cause for high trace resistance in a sketched circuit is insufficient deposit of conductive materials. Imagine a conductive trace as a river, where electrons flow through it like water. Making sure the river is fully connected throughout its length and widening it can ensure the water flows through it easily. The length of a trace also affects the resistance - the longer the river is, the more difficult it is for water to reach the end. Other than changing the design by shortening the electrical traces, there are three ways we can lower the resistance. </p>
+                        <ul>
+                        <li><strong>Deposit more conductive material on the drawn trace </strong>
+
+                        <p>This method does not change the visual design of the drawn trace. By drawing over an existing trace, you ensure that the trace "river" is fully connected to allow the electron "water" to flow through.</p>
+
+                        <div class="row">
+                        <%= image_tag "/increase_conductance_layer.gif", :width => "50%", :class=> "center-block" %>
+                        </div>
+                        </li>
+
+                        <li><strong>Widen the drawn trace</strong> 
+                            <p>Widening the drawn trace essentially widens the "river" where electrons flow through, making it easier for the electrons to reach their final destination. Widening the trace can be done by simply thickening the trace or create flourish around it to provide alternative paths for the electrons to flow through.
+                                <div>
+                                <%= image_tag "/increase_conductance_widen.gif", :width => "50%", :class=>"col-xs-6" %>
+                                <%= image_tag "/increase_conductance_flourish.gif", :width => "50%", :class=>"col-xs-6" %>
+                                
+                                </div>
+                            </p>
+                        </li>
+                        </ul>
+
+                        <br class="clearfix">
+                    </div>
+                <div role="tabpanel" class="tab-pane" id="higher-r">
+                    <h4>How to Increase Resistance</h4>
+                        <p>Remove the power source (i.e. battery, power supply) immediately, if you notice:
+                        <ul>
+                        <li>an overly bright LED</li>
+                        <li>a component warm to the touch</li>
+                        <li>an unpleasant burnt smell</li>
+                        </ul>
+                        These problems could be caused by the lack of electrical resistance, which causes an overflowing of current reaching an electronic part. This could potentially damage your circuit components. 
+                        This problem can be remedied in the following ways. </p>
+                        <ul><strong>Add a resistor in series</strong>
+                        <p>If the design allows, cut a small hole to disconnect the original trace, and attach a resistor of the desired value with z-tape to reconnect the trace. (add gif)</p></ul>
+                        <ul><strong>Create an alternative, longer electrical path</strong>
+                        <p>Severe the connection to the original trace by cutting the paper or scraping off the conductive material (just a small area would do). Calibrate the conductive material, and redraw a longer, possibly meandering trace, in the design tool. After confirming the resistance is sufficient with the design tool, draw the longer trace with the conductive pen. (add gif)</p></ul>
+                    </div>
+              </div>
+
+            </div>
+
+
+            
+            <hr>
+            
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Got it!</button>
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
+</div>

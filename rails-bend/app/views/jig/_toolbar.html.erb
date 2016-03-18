@@ -1,0 +1,236 @@
+<script type="text/javascript">
+$(function(){
+	
+	$('#collection').hide();
+	var lib_on = false;
+	$("#clear-canvas-and-history").click(function(){
+		hm.clear_all();
+		zoom.home();
+	});	
+	$('#add-library, #toggle-switch').click(function(){
+		$('#collection').slideToggle(500);
+		lib_on = !lib_on;
+
+		if(lib_on){
+		 $("#big-undo, #circuit-toolbox, #canvas-toolbox").animate({
+		    bottom: "+=200"
+		  }, 500, function() {
+		    // Animation complete.
+		  });
+		}
+		else{
+		 $("#big-undo, #circuit-toolbox, #canvas-toolbox").animate({
+		    bottom: "-=200"
+		  }, 500, function() {
+		    // Animation complete.
+		  });
+		}
+	});
+
+	$('#send-to-print').click(function(){
+		designer.art_layer.print_mode(true);
+		designer.circuit_layer.print_view();
+    	JigExporter.export(designer.paper, designer.canvas, JigExporter.SVG);
+    	designer.art_layer.print_mode(false);
+    	designer.circuit_layer.trace_view();
+   	});
+  
+	$("#design-name b").html(design.name);
+   $('#save-json').click(function(){
+   	hm.server_save();
+   	//hm.save();
+    // JigExporter.export(designer.paper, designer.canvas, JigExporter.JSON);
+   });
+  $('#save-png').click(function(){
+    JigExporter.export(designer.paper, designer.canvas, JigExporter.PNG);
+   });
+  $('#print').click(function(){
+    window.location = "/jig/generator";
+   });
+  calibrationScripts();
+  // MOBILE FIX
+
+  	$(".mode, a, button, .btn").on("touchstart", function(){ 
+  		// console.log("Mobile fix");
+    	$(this).removeClass("mobileHoverFix");
+	});
+	$(".mode, a, button, .btn").on("touchend", function(){ 
+		// console.log("Mobile fix");
+	    $(this).addClass("mobileHoverFix");
+	});
+});
+
+function calibrationScripts(){
+	$('#calibration-toolbox').hide();
+	$('#calibrate').click(function(){
+		$('#calibration-toolbox').slideToggle(300);
+	});
+
+}
+
+
+</script>
+<!-- _toolbar.html.erb -->
+
+	<nav class="navbar-secondary" role="navigation">
+	
+
+
+
+		<button id="add-library" class="pull-left btn btn-norm btn-ellustrator">
+			<span class='glyphicon glyphicon-plus'></span>
+			ADD FROM LIBRARY
+		</button>
+
+		<button id="clear-canvas-and-history" class="pull-left btn btn-norm btn-ellustrator">
+			<span class='glyphicon glyphicon-ban-circle'></span>
+			CLEAR CANVAS AND HISTORY
+		</button>
+
+
+		<!-- <button id="calibrate" class="pull-left btn btn-norm btn-ellustrator">
+			<span class='glyphicon glyphicon-tasks'></span>
+			CALIBRATE MATERIAL
+		</button> -->
+	
+
+
+		<div class="btn-group pull-right">
+			<a href="/jig/interface/<%= @design_obj.id%>?mode=draw" id="draw-design" data-mode="draw" class="mode btn btn-norm btn-success">
+				<span class='glyphicon glyphicon-edit'></span>
+					Draw
+			</a>
+			
+			<a href="/jig/interface/<%=@design_obj.id %>?mode=validate" id="validate-design" data-mode="validate" class=" mode btn btn-norm btn-primary">
+				<span class='glyphicon glyphicon-check'></span>
+					Validate
+			</a>	
+			<a href="/jig/interface/<%= @design_obj.id%>?mode=make" id="make-design" data-mode="make" class="mode btn btn-norm btn-mira">
+				<span class='icon-inkwell'></span>
+					Make
+			</a>
+		</div>
+
+		<div id="save-actions" class="btn-group pull-right">
+			<button id="send-to-print" class="btn btn-norm btn-ellustrator">
+				<span class='glyphicon glyphicon-print'></span>
+				Print
+			</button>
+			<%= button_tag :id=>"save-json", :class=>"btn btn-norm btn-ellustrator" do %>
+	      		<span class="glyphicon glyphicon-floppy-disk"></span>
+	      		Save to Server
+	    	<% end %>
+	    </div>
+
+	</nav>
+	
+	  <div class="container">
+	  	<% if notice %>
+		  <p class="alert alert-success"><%= notice %></p>
+		<% end %>
+		<% if alert %>
+		  <p class="alert alert-danger"><%= alert %></p>
+		<% end %>
+	    <%= yield %>
+	  </div>
+
+<style>
+/* IPAD FIX */
+
+.mobileHoverFix:hover,
+.mobileHoverFix.hover{
+    background-position: 0 0px;
+}
+
+/* */
+
+
+#send-to-print{
+	z-index: 100000;
+}
+.btn-group{
+	/*padding-right: 10px;*/
+}
+.navbar-default{
+	/*box-shadow: 1px 1px 5px 1px rgba(0, 0, 0, 0.3);*/
+	background: #484848;
+	position: relative;
+	/*top: -1px;*/
+	border: none;
+	border-radius: 0;
+}
+.navbar-secondary{
+	position: relative;
+	/*top: -20px;*/
+	height: 50px !important;
+	/*overflow: hidden;*/
+	background: #333;
+	/*background: rgba(220, 220, 220, 0.9);*/
+	padding: 6px 15px;
+	margin-bottom: 0;
+	border: none;
+	z-index: 100;
+}
+.navbar-secondary .btn-group, .navbar-secondary > .btn{
+	margin-right: 5px;
+}
+
+.navbar-brand{
+	margin-right: -15px;
+}
+.navbar-header #design-name{	
+	padding: 15px 15px;
+	margin-right: -15px;
+	margin-left: -15px;
+	border-right: 1px solid rgba(0, 0, 0, 0.1) ;
+}
+#design-name b{
+	font-weight: normal;
+	background: white;
+	padding: 14px;
+	padding-right: 300px;
+	margin-right: -15px;
+	/*box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.1);*/
+}
+#design-name b:focus{
+	padding: 11.5px;
+	padding-right: 300px;
+}
+#logo{
+	background: #F7941E;
+	color: white;
+	padding: 17px;
+	position: relative;
+	top: -1px;
+	left: -1px;
+}
+[class^='icon-']:before {
+    display: inline-block;
+    font-family: 'Glyphter';
+    font-style: normal;
+    font-weight: normal;
+    line-height: 0.4;
+    font-size: 12pt;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    position: relative;
+    top: 3px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#logo img{
+	width: 20px;
+}
+#main-actions{
+	/*background: white !important;*/
+	float: right;
+	position: absolute;
+	right: 15px;
+}
+
+.container-fluid{
+	padding-left: 0px;
+	padding-right: 0px;
+}
+</style>

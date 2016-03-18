@@ -1,0 +1,116 @@
+<script>
+// Multimeter.js
+
+Multimeter.modes = {
+	resistance: {"image": "/resistanceMode.png"},
+	voltage: {"image": "/voltageMode.png"},
+	continuity: {"image": "/continuityMode.png"},
+}
+Multimeter.getSrc = function(mode){
+		return Multimeter.modes[mode].image;
+	}
+
+function Multimeter(dom){
+	this.dom = dom;
+	this.probes = {
+		a: { tri: 
+				new paper.Path.RegularPolygon({
+					sides: 3, 
+					center: paper.view.center.clone(), 
+					fillColor: "red", 
+					radius: 20, 
+					terminal_helper: true
+				}), 
+			dot: new paper.Path.Circle({
+				position: paper.view.center.clone(),
+				fillColor: "red", 
+				radius: 4, 
+				terminal_helper: true
+			}), 
+		},
+		b: { tri: 
+				new paper.Path.RegularPolygon({
+					sides: 3, 
+					center: paper.view.center.clone(), 
+					fillColor: "black", 
+					radius: 20, 
+					terminal_helper: true, 
+					rotation: 180
+				}), 
+			dot: new paper.Path.Circle({
+				position: paper.view.center.clone(),
+				fillColor: "black", 
+				radius: 4, 
+				terminal_helper: true
+			})
+		}
+	}
+
+	this.hide();
+}
+
+Multimeter.prototype = {
+	show: function(mode, probeA, probeB){
+		// console.log('SHOWING Multimeter', mode);
+		var modeImage = Multimeter.modes[mode].image;
+		this.dom.find('img').attr('src', modeImage);
+
+		this.probes.a.tri.position = probeA.clone();
+		this.probes.b.tri.position = probeB.clone();
+		this.probes.a.tri.position.x -= 145;
+		this.probes.b.tri.position.x -= 145;
+		this.probes.a.dot.position = probeA.clone();
+		this.probes.b.dot.position = probeB.clone();
+		this.probes.a.dot.position.x -= 145;
+		this.probes.b.dot.position.x -= 145;
+
+
+
+
+
+		this.probes.a.tri.position.y += 15;
+		this.probes.b.tri.position.y -= 15;
+		// this.probes.b.rotation = 90;
+		this.dom.fadeIn();
+		paper.project.activeLayer.addChildren([this.probes.a.tri, this.probes.b.tri, this.probes.a.dot, this.probes.b.dot]);
+		// this.probes.a.dot.sendToBack();
+		// this.probes.b.dot.sendToBack();
+		paper.view.update();
+		return modeImage;
+	}, 
+	
+	hide: function(){
+		this.dom.fadeOut();
+		if(this.probes.a.tri) this.probes.a.tri.remove();
+		if(this.probes.b.tri) this.probes.b.tri.remove();	
+		if(this.probes.a.dot) this.probes.a.dot.remove();
+		if(this.probes.b.dot) this.probes.b.dot.remove();
+		paper.view.update();
+	}
+}
+var multimeter;
+$(function(){
+	multimeter = new Multimeter($('#multimeter_holder'));
+	probeB = paper.view.center.clone();
+	probeB.x += 20;
+});
+</script>
+
+
+<div id="multimeter_holder">
+	<img src="/voltageMode.png"/>
+</div>
+
+<style type="text/css">
+	#multimeter_holder{
+		position: absolute;
+		top: 100px;
+		right: 20%;
+		z-index: 10000;
+		width: 200px;
+	    pointer-events: none; 
+	}
+	#multimeter_holder img{
+		width: 100%;
+	}
+</style>

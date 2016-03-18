@@ -1,0 +1,391 @@
+<div id="calibration-toolbox" class="toolbox shadowed">
+   <div class="row">
+   <div class="col-xs-8">
+      <label class="text-shadowed"> CALIBRATE MATERIAL SHEET RESISTANCE</label>
+    </div>
+    <div class="col-xs-4">
+     <label class="info pull-right text-shadowed"> 
+      <!-- Button trigger modal -->
+      <span id="calibration-info" data-toggle="modal" data-target="#myModal" class="glyphicon glyphicon-info-sign" title="How do I measure sheet resistance?"></span>
+     </label>
+   </div>
+   </div>
+    <form id="sheet-resistance" class="input-group">
+      <input type="text" class="form-control" placeholder="Measure Ω of 0.25 inch square (default 0.5).">
+      <span class="input-group-btn">
+        <button type="submit" class="btn btn-primary" type="button">SAVE</button>
+      </span>
+    </form>
+</div>
+
+<!-- CANVAS TOOLS -->
+<div id="canvas-toolbox" class="toolbox shadowed">
+   <!-- <label class="text-shadowed"> CANVAS </label> -->
+          
+          <%= button_tag :id => "transform-tool", :class => "btn touch-btn-lg btn-ellustrator" do %>
+            <span class="touch-glyph glyphicon glyphicon-hand-up"></span>
+             <label id="select-label"> SELECT </label>
+          <% end %>
+          <!-- PAN AND HOME -->
+          <!-- <div class="btn-group" role="group" id="zoom-ui" aria-label="zoom-tools"> -->
+              <%= button_tag :id => "canvas-pan-tool", :class => "btn touch-btn-120 touch-btn-md btn btn-lg btn-ellustrator" do %>
+                <span class="icon-pan"></span>
+              <% end %>   
+
+               <%= button_tag :id=>"homing", :class=>"btn touch-btn-150 touch-btn-md btn btn-lg btn-ellustrator" do %>
+                <span class="icon-homing"></span>
+              <% end %>
+          <!-- </div> -->
+</div>
+
+<div id="circuit-toolbox" class="toolbox shadowed">
+     <!-- <label> CIRCUIT LAYER </label> -->
+    
+      <!-- PATH TOOLS -->
+      <div class="btn-group" role="group" aria-label="pen-tools">
+        <%= button_tag :id => "path-tool", :class => "btn touch-btn-lg btn-ellustrator" do %>
+        <span class="touch-icon-path"></span> 
+        <label> CIRCUIT </label>
+        <% end %>
+      </div>
+      
+      <!-- REMOVE ITEMS -->
+      <%= button_tag :id=>"remove-element", :class=>"btn touch-btn-md touch-btn-60 btn-ellustrator" do %>
+        <span class="glyphicon glyphicon-ban-circle"></span>
+        <!-- <span class="icon-delete-path"></span> -->
+      <% end %>
+      
+        <!-- BRUSH SIZE BUTTONS -->
+      <!-- <div class="btn-group" role="group" aria-label="pen-tools"> -->
+      <%= button_tag :id => "brush-size-label", :class => "btn touch-btn-num touch-btn-md " do %>
+        2
+        <% end %>
+        <%= button_tag :id => "brush-size-increase", :class => "btn touch-btn-30 touch-btn-md btn-ellustrator" do %>
+        <span class="glyphicon glyphicon-plus"></span>
+        <!-- <span class="icon-brush-size-increase"></span> -->
+        <% end %>
+        <%= button_tag :id => "brush-size-decrease", :class => "btn touch-btn-45 touch-btn-md btn-ellustrator" do %>
+        <!-- <span class="icon-brush-size-decrease"></span> -->
+         <span class="glyphicon glyphicon-minus"></span>
+        <!-- <span class="icon-brush-size-decrease"></span> -->
+        <% end %>
+      <!-- </div>  -->
+  </div>   
+  
+<div id="dev-toolbox" class="toolbox shadowed">
+   <label class="text-shadowed"> DEV TOOLS </label>
+      <div class="btn-group" role="group" aria-label="pen-tools">
+      
+      <%= button_tag :id => "dev-tool-1", :class => "btn btn-ellustrator" do %>
+        <span class="glyphicon glyphicon-backward"></span>
+      <% end %>
+
+      <%= button_tag :id => "dev-tool-2", :class => "btn btn-ellustrator" do %>
+        <span class="glyphicon glyphicon-cog"></span>
+      <% end %>
+
+      <%= button_tag :id => "dev-tool-3", :class => "btn btn-ellustrator" do %>
+         <span class="glyphicon glyphicon-forward"></span>
+      <% end %>   
+      <%= button_tag :id => "dev-tool-4", :class => "btn btn-ellustrator" do %>
+         <span class="glyphicon glyphicon-record"></span>
+      <% end %>
+      </div>
+      <div class='btn-group'>
+      <%= button_tag :id=>"zoom-out", :class=>"btn btn-md btn-ellustrator" do %>
+          <span class="glyphicon glyphicon-zoom-out"></span>
+        <% end %>
+
+          
+        
+        <%= button_tag :id=>"zoom-in", :class=>"btn btn-md btn-ellustrator" do %>
+            <span class="glyphicon glyphicon-zoom-in"></span>
+        <% end %>
+    </div>
+</div>
+
+<div id="on-it">
+  <div class="btn-group">
+    <button id="pad-check" class="btn btn-default"> TRACE/PAD </button>
+    <button id="canvas-check" class="btn btn-default"> CANVAS </button>
+    <button id="connection-check" class="btn btn-info"> CONNECTION </button>
+  </div>
+</div>
+<style>
+#dev-toolbox {
+  position: absolute;
+  top: 110px;
+  left: 220px;
+  /*calc(34% + 98px + 10px);*/
+  width: 270px;
+  z-index: 100000;
+  // display: none;
+}
+
+#brush-size-label{
+  position: absolute;
+  top: calc(55px - 38px);
+  left: calc(30px + 75px);
+  border: white 1px solid !important;
+  padding: 10px 15px !important;
+  /*color: black;*/
+  background: #00A8e1;
+  border: #333 solid 1px;
+}
+.touch-btn-150{
+  position: absolute;
+  top: calc(55px - 80px);
+  left: calc(30px - 15px);
+  border: white 1px solid;
+}
+.touch-btn-60{
+  /* delete icon */
+  position: absolute;
+  top: calc(55px - 80px);
+  left: calc(30px - 50px);
+  border: white 1px solid;
+}
+.touch-btn-30{
+  /* + icon */
+  position: absolute;
+  top: calc(55px - 70px);
+  left: calc(30px + 45px);
+  border: white 1px solid;
+}
+.touch-btn-120{
+  position: absolute;
+  top: calc(55px - 50px);
+  left: calc(30px - 65px);
+  border: white 1px solid;
+}
+.touch-btn-45{
+  position: absolute;
+  top: calc(55px - 0px);
+  left: calc(30px + 80px);
+  border: white 1px solid;
+}
+.toolbox .btn-group{
+  margin-right: 5px;
+}
+#calibration-toolbox {
+  position: absolute;
+  top: 146px;
+  left: 50%;
+  margin-left: -200px;
+  width: 400px;
+  font-family: "museo-sans";
+}
+  #calibration-toolbox #sheet-resistance{
+    text-align: left;
+  }
+#on-it {
+  position: absolute;
+  top: 60px;
+  left: 5px;
+  background: none;
+  border: none;
+  box-shadow: none;
+  z-index: 1000000;
+  /*calc(34% + 98px + 10px);*/
+  width: 400px;
+}
+#export-toolbox {
+  position: absolute;
+  top: 280px;
+  right: 5px;
+  background: none;
+  border: none;
+  box-shadow: none;
+  /*calc(34% + 98px + 10px);*/
+  width: 120px;
+}
+#canvas-toolbox {
+  position: absolute;
+  bottom: 50px;
+  right: 160px;
+   background: none;
+  border: none;
+  box-shadow: none;
+  /*calc(34% + 98px + 10px);*/
+  z-index: 100000;
+}
+#select-label{
+    top: 110px;
+    left: 25px;
+}
+#circuit-toolbox{
+  position: absolute;
+  bottom: 50px;
+  /*left: 10px;*/
+  /*left: 310px;*/
+  right: 50px;
+  /*width: 250px;*/
+  background: none;
+  border: none;
+  box-shadow: none;
+  z-index: 1000000;
+}
+#artwork-toolbox {
+  position: absolute;
+  top: 180px;
+  left: 0px;
+  width: 210px;
+  display: none;
+}
+.touch-btn-lg{
+    height: 100px;
+    width: 100px;
+    padding: 10px 16px;
+    line-height: 1.33;
+    border-radius: 100px;
+}
+.touch-btn-lg > label{
+  display: block;
+  font-size: 14px !important;
+  position: relative;
+  text-align: left;
+  bottom: 15px;
+  width: 100%;
+  left: 20px;
+  font-size: 18pt;
+}
+
+  [class^='touch-icon-']:before {
+      display: inline-block;
+      font-family: 'Glyphter';
+      font-style: normal;
+      font-weight: normal;
+      line-height: 0.4;
+      font-size: 25pt;
+      padding-top: 0px;
+      padding-bottom: 0px;
+      position: relative;
+      top: 0px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+  }
+.touch-glyph{
+  top: -5px;
+  font-size: 18pt;
+}
+.touch-btn-md .glyphicon{
+  top: 0px;
+
+}
+.touch-btn-md {
+  padding: 12px 15px !important;
+}
+.touch-btn-md{
+  /*width: 40px;*/
+  /*height: 40px;*/
+  padding: 10px 15px;
+  /*padding: 0px 0px;*/
+  font-size: 16px;
+  line-height: 1.33;
+  border-radius: 90px;
+}
+
+.btn-ellustrator{
+  color: #FFF;
+  background: #5d5d5d;
+}
+/*.btn-ellustrator:not(.btn-xs), #run-tool, #ohm-tool{
+  height: 36px;
+  overflow: hidden;
+}*/
+.btn-ellustrator.btn-lg{
+  height: 48px;
+  overflow: hidden;
+}
+.glyphicon-record:before {
+  position: relative;
+  top: 2px;
+}
+#ohm-tool{
+  line-height: 1.9;
+}
+.btn-ellustrator:hover{
+  color: #DDD;
+  text-decoration: none;
+}
+.btn-ellustrator:active{
+    color: white !important;
+    background-color: #ec971f !important;
+    border-color: #d58512 !important;
+}
+.btn-ellustrator:visited{
+  color: #FFF;
+  text-decoration: none;
+}
+.btn-ellustrator:focus{
+  color: #FFF;
+  text-decoration: none;
+}
+
+.toolbox{
+  height: 90px;
+  border-bottom: #999 1px solid;
+  background: #484848;
+  border-left: 3px solid #5d5d5d;
+  border-right: 3px solid #5d5d5d;
+  padding: 4px;
+  padding-top: 28px;
+  z-index: 200; 
+  font-family: "Glyphter";
+  color: white;
+}
+  .toolbox label{
+    font-family: "Helvetica", "Arial", sans-serif;
+    font-weight: bold;
+    color: #ddddd;
+    font-size: 7.43pt;
+    margin: 2px;
+    margin-top: -18px;
+    /*margin-bottom: 4px;*/
+    position: absolute;
+  }
+  .info{
+    font-family: "Helvetica", "Arial", sans-serif;
+    font-weight: bold;
+    color: #ddddd;
+    font-size: 6.43pt;
+    margin: 2px;
+    margin-top: -12px;
+    cursor: pointer;
+  }
+</style> 
+<script type="text/javascript">
+// CANVAS - TRANSFORM, PAN, CANVAS_PAN
+$(function(){
+  $('#connection-check').hover(function(){
+    designer.circuit_layer.connect_view();
+  }, function(){
+    designer.circuit_layer.unconnect_view();
+  })
+
+});
+var tool_config = [
+  {
+    name: "pathtool",
+    dom: "path-tool",
+    js: "TracePathTool"
+  },
+  {
+    name: "transformtool",
+    dom: "transform-tool",
+    js: "TransformTool2"
+  },
+
+    {
+    name: "deletetool",
+    dom: "remove-element",
+    js: "DeleteTool"
+  },
+  {
+    name: "canvaspantool",
+    dom: "canvas-pan-tool",
+    js: "CanvasPanTool"
+  }
+];
+</script>
+

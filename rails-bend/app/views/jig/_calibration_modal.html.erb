@@ -1,0 +1,31 @@
+
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">How to Measure Sheet Resistance </h4>
+      </div>
+      <div class="modal-body">
+            <div class="row">
+            <%= image_tag "/calibration.png", :class=> "center-block" %>
+          </div>
+          <br>
+            <p>The purpose of the calibration is to create a digital model that mimics your physical circuit as accurately as possible. </p>
+            <ol>
+            <li>Print out the calibration page. </li>
+            <li>Fill out the calibration square with your conductive material. If ink was used, let it dry by </li>
+            <li>Measure the conductivity of the square by placing the multimeter probes on the corners of the square. </li>
+            <li>Input the resistance into the indicated field. </li>
+          </ol>
+          <a href="/sheet-resistance-sheet.pdf" target="_blank" class="btn btn-default"> sheet-resistance-sheet.pdf </a>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Got it!</button>
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
+</div>
