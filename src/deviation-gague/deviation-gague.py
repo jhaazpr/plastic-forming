@@ -8,7 +8,9 @@ cimg = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
 cimg_clone = cimg.copy()
 cv2.namedWindow('Deviation Gague')
 
-# Messy global overhead for click callback
+# Globals for Tracking clicks
+tracking_centers = []
+tracking_labels = ['TL', 'BR', 'TR', 'BL']
 clicked_tracking_pts = []
 selecting = False
 
@@ -27,16 +29,15 @@ def click_set_tracking_point(event, x, y, flags, param):
     # (x, y) coordinates and indicate that cropping is being
     # performed
     if event == cv2.EVENT_LBUTTONDOWN:
-        clicked_tracking_pts = [(x, y)]
         selecting = True
-        cv2.circle(cimg, (x, y) ,2,(255,0,0),3)
-        cv2.imshow('Deviation Gague', cimg)
 
     # check to see if the left mouse button was released
     if event == cv2.EVENT_LBUTTONUP:
         # record the ending (x, y) coordinates and indicate that
         # the cropping operation is finished
         clicked_tracking_pts.append((x, y))
+        cv2.circle(cimg, (x, y) ,2,(255,0,0),3)
+        cv2.imshow('Deviation Gague', cimg)
         selecting = False
 
         # draw a rectangle around the region of interest
@@ -60,8 +61,6 @@ def find_circles():
     norms_top_left = []
     norms_top_right = []
     centers = []
-    tracking_centers = []
-    tracking_labels = ['TL', 'BR', 'TR', 'BL']
 
     for i in circles[0,:]:
         # draw the outer circle
@@ -83,7 +82,7 @@ def find_circles():
     tracking_centers.append(centers[norms_top_right.index(max(norms_top_right))])
 
     for center in enumerate(tracking_centers):
-        print center
+        # print center
         cv2.circle(cimg,tuple(center[1]),2,(255,0,0),3)
         cv2.putText(cimg, tracking_labels[center[0]], tuple(center[1]), FONT, 1,(255,255,255),2)
 
@@ -93,9 +92,10 @@ while True:
     key = cv2.waitKey(1) & 0xFF
 
     if key == ord('r'):
+        tracking_centers = []
         clicked_tracking_pts = []
-        cimg = cimg_clone
-        # find_circles()
+        cimg = cimg_clone.copy()
+        find_circles()
         cv2.imshow('Deviation Gague', cimg)
 
     if key == ord('e'):
@@ -104,4 +104,5 @@ while True:
     if key == ord ('q'):
         break
 
+print clicked_tracking_pts
 cv2.destroyAllWindows()
