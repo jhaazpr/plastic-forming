@@ -10,7 +10,7 @@ cv2.namedWindow('Deviation Gague')
 
 # Globals for Tracking clicks
 tracking_centers = []
-tracking_labels = ['TL', 'BR', 'TR', 'BL']
+tracking_labels = ['TL', 'TR', 'BR', 'BL']
 clicked_tracking_pts = []
 selecting = False
 
@@ -36,7 +36,7 @@ def click_set_tracking_point(event, x, y, flags, param):
         # record the ending (x, y) coordinates and indicate that
         # the cropping operation is finished
         clicked_tracking_pts.append((x, y))
-        cv2.circle(cimg, (x, y) ,2,(255,0,0),3)
+        cv2.circle(cimg, (x, y) ,5,(255,255,0),3)
         cv2.imshow('Deviation Gague', cimg)
         selecting = False
 
@@ -75,16 +75,26 @@ def find_circles():
         norms_top_left.append(np.linalg.norm((i[0],i[1]) - TOP_LEFT))
         norms_top_right.append(np.linalg.norm((i[0],i[1]) - TOP_RIGHT))
 
-    # Add principal points in this order [TL, BR, TR, BL]
+    # Add principal points in this order [TL, TR, BR, BL]
     tracking_centers.append(centers[norms_top_left.index(min(norms_top_left))])
-    tracking_centers.append(centers[norms_top_left.index(max(norms_top_left))])
     tracking_centers.append(centers[norms_top_right.index(min(norms_top_right))])
+    tracking_centers.append(centers[norms_top_left.index(max(norms_top_left))])
     tracking_centers.append(centers[norms_top_right.index(max(norms_top_right))])
 
     for center in enumerate(tracking_centers):
         # print center
         cv2.circle(cimg,tuple(center[1]),2,(255,0,0),3)
         cv2.putText(cimg, tracking_labels[center[0]], tuple(center[1]), FONT, 1,(255,255,255),2)
+
+def eval_features():
+    if len(clicked_tracking_pts) != 4:
+        print "Error: need exactly four clicked points in clockwise order: {}".format(tracking_labels)
+        return
+    sq_errors = []
+    for truth in enumerate(clicked_tracking_pts):
+        err = np.linalg.norm(truth[1] - tracking_centers[truth[0]])
+        sq_errors.append(err ** 2)
+    print "Squared errors: {}".format(sq_errors)
 
 find_circles()
 cv2.imshow('Deviation Gague', cimg)
@@ -99,10 +109,9 @@ while True:
         cv2.imshow('Deviation Gague', cimg)
 
     if key == ord('e'):
-        pass
+        eval_features()
 
     if key == ord ('q'):
         break
 
-print clicked_tracking_pts
 cv2.destroyAllWindows()
