@@ -94,7 +94,19 @@ def eval_features():
     for truth in enumerate(clicked_tracking_pts):
         err = np.linalg.norm(truth[1] - tracking_centers[truth[0]])
         sq_errors.append(err ** 2)
+    tracking_centers_tup = map(lambda np_arr: tuple(np_arr), tracking_centers)
+    print "Estimated points: {}".format(tracking_centers_tup)
+    print "True (clicked) points: {}".format(clicked_tracking_pts)
     print "Squared errors: {}".format(sq_errors)
+
+    # Source points are detected tracking points in the iamge
+    pts_src = np.array([list(t) for t in tracking_centers_tup]).astype(float)
+    # Destination points are the corners of the screen
+    pts_dst = np.array([[0, 0], [IMG_WIDTH, 0], [IMG_WIDTH, IMG_HEIGHT], [0, IMG_HEIGHT]]).astype(float)
+    homog, status = cv2.findHomography(pts_src, pts_dst)
+    # print homog
+    im_crop = cv2.warpPerspective(cimg, homog, (IMG_WIDTH, IMG_HEIGHT))
+    cv2.imshow("Cropped", im_crop)
 
 find_circles()
 cv2.imshow('Deviation Gague', cimg)
