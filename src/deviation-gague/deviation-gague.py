@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import cv2.cv as cv
+import json
 
 img = cv2.imread('paper_reduced_shape.png',0)
 img = cv2.medianBlur(img,5)
@@ -90,17 +91,17 @@ def eval_features():
     """
     Evaluates the use-input points and returns a transformed image.
     """
-    if len(clicked_tracking_pts) != 4:
-        print "Error: need exactly four clicked points in clockwise order: {}".format(tracking_labels)
-        return
-    sq_errors = []
-    for truth in enumerate(clicked_tracking_pts):
-        err = np.linalg.norm(truth[1] - tracking_centers[truth[0]])
-        sq_errors.append(err ** 2)
+    # if len(clicked_tracking_pts) != 4:
+    #     print "Error: need exactly four clicked points in clockwise order: {}".format(tracking_labels)
+    #     return
+    # sq_errors = []
+    # for truth in enumerate(clicked_tracking_pts):
+    #     err = np.linalg.norm(truth[1] - tracking_centers[truth[0]])
+    #     sq_errors.append(err ** 2)
     tracking_centers_tup = map(lambda np_arr: tuple(np_arr), tracking_centers)
-    print "Estimated points: {}".format(tracking_centers_tup)
-    print "True (clicked) points: {}".format(clicked_tracking_pts)
-    print "Squared errors: {}".format(sq_errors)
+    # print "Estimated points: {}".format(tracking_centers_tup)
+    # print "True (clicked) points: {}".format(clicked_tracking_pts)
+    # print "Squared errors: {}".format(sq_errors)
 
     # Source points are detected tracking points in the iamge
     pts_src = np.array([list(t) for t in tracking_centers_tup]).astype(float)
@@ -110,6 +111,24 @@ def eval_features():
     # print homog
     # cimg_copy = cimg.copy()
     return cv2.warpPerspective(cimg, homog, (IMG_WIDTH, IMG_HEIGHT))
+
+def parse_contour(contours):
+    # Form: [[[x1, y1], [x2, y2], ... [xn, yn]] [[x1, y1], ... [xn, yn]]
+    data = {}
+    data['width'] = 0
+    data['height'] = 0
+    data['paths'] = []
+    for group in contours:
+        num_pts = group.shape[0]
+        group = group.reshape((num_pts, 2))
+        group = group.tolist()
+        path = {}
+        path['type'] = 'Path'
+        path['closed'] = 'true' # NOTE: not sure about this
+        path['segments'] = group
+        data['paths'].append(path)
+    final = { 'data' : data}
+    return json.dumps(final)
 
 find_circles()
 cv2.imshow('Deviation Gague', cimg)
@@ -137,8 +156,9 @@ while True:
 
     # Find countours
     if key == ord('c'):
-        (contours, hierarchy) = cv2.findContours(cimg, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        with open("contours.txt", "w+") as cont_file:
+        (contours, hierarchy) = cv2.findContours(cimg, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        contours = parse_contour(contours)
+        with open("contours.json", "w+") as cont_file:
             cont_file.write(str(contours))
             cont_file.flush()
             cont_file.close()
