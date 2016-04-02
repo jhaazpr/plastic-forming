@@ -87,7 +87,7 @@ def find_circles():
         cv2.circle(cimg,tuple(center[1]),2,(255,0,0),3)
         cv2.putText(cimg, tracking_labels[center[0]], tuple(center[1]), FONT, 1,(255,255,255),2)
 
-def eval_features():
+def perp_transform():
     """
     Evaluates the use-input points and returns a transformed image.
     """
@@ -111,6 +111,19 @@ def eval_features():
     # print homog
     # cimg_copy = cimg.copy()
     return cv2.warpPerspective(cimg, homog, (IMG_WIDTH, IMG_HEIGHT))
+
+def eval_features():
+    if len(clicked_tracking_pts) != 4:
+        print "Error: need exactly four clicked points in clockwise order: {}".format(tracking_labels)
+        return
+    sq_errors = []
+    for truth in enumerate(clicked_tracking_pts):
+        err = np.linalg.norm(truth[1] - tracking_centers[truth[0]])
+        sq_errors.append(err ** 2)
+    tracking_centers_tup = map(lambda np_arr: tuple(np_arr), tracking_centers)
+    print "Estimated points: {}".format(tracking_centers_tup)
+    print "True (clicked) points: {}".format(clicked_tracking_pts)
+    print "Squared errors: {}".format(sq_errors)
 
 def parse_contour(contours):
     # Form: [[[x1, y1], [x2, y2], ... [xn, yn]] [[x1, y1], ... [xn, yn]]
@@ -149,9 +162,13 @@ while True:
         find_circles()
         cv2.imshow('Deviation Gague', cimg)
 
-    # Evaluate user-input tracking points and apply persp. transform
+    # Evaluate user-input tracking points
     if key == ord('e'):
-        cimg = eval_features()
+        eval_features()
+
+    # Apply a perspective transform and crop
+    if key == ord('h'):
+        cimg = perp_transform()
         cv2.imshow('Deviation Gague', cimg)
 
     # Find countours
@@ -162,6 +179,7 @@ while True:
             cont_file.write(str(contours))
             cont_file.flush()
             cont_file.close()
+        print "Contours written to contours.json"
 
     # Quit
     if key == ord ('q'):
