@@ -2,9 +2,9 @@ import numpy as np
 import cv2
 import cv2.cv as cv
 
-img = cv2.imread('paper_reduced.png',0)
+img = cv2.imread('paper_reduced_shape.png',0)
 img = cv2.medianBlur(img,5)
-cimg = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
+cimg = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 cimg_clone = cimg.copy()
 cv2.namedWindow('Deviation Gague')
 
@@ -87,6 +87,9 @@ def find_circles():
         cv2.putText(cimg, tracking_labels[center[0]], tuple(center[1]), FONT, 1,(255,255,255),2)
 
 def eval_features():
+    """
+    Evaluates the use-input points and returns a transformed image.
+    """
     if len(clicked_tracking_pts) != 4:
         print "Error: need exactly four clicked points in clockwise order: {}".format(tracking_labels)
         return
@@ -102,17 +105,24 @@ def eval_features():
     # Source points are detected tracking points in the iamge
     pts_src = np.array([list(t) for t in tracking_centers_tup]).astype(float)
     # Destination points are the corners of the screen
-    pts_dst = np.array([[0, 0], [IMG_WIDTH, 0], [IMG_WIDTH, IMG_HEIGHT], [0, IMG_HEIGHT]]).astype(float)
+    pts_dst = np.array([[0 - 10, 0 - 10], [IMG_WIDTH + 10, 0 - 10], [IMG_WIDTH + 10, IMG_HEIGHT + 10], [0 - 10, IMG_HEIGHT + 10]]).astype(float)
     homog, status = cv2.findHomography(pts_src, pts_dst)
     # print homog
-    im_crop = cv2.warpPerspective(cimg, homog, (IMG_WIDTH, IMG_HEIGHT))
-    cv2.imshow("Cropped", im_crop)
+    # cimg_copy = cimg.copy()
+    return cv2.warpPerspective(cimg, homog, (IMG_WIDTH, IMG_HEIGHT))
 
 find_circles()
 cv2.imshow('Deviation Gague', cimg)
 while True:
     key = cv2.waitKey(1) & 0xFF
 
+    # Threshold image
+    if key == ord('t'):
+        cimg_grey = cv2.cvtColor(cimg, cv2.COLOR_BGRA2GRAY)
+        (thresh, cimg) = cv2.threshold(cimg_grey, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+        cv2.imshow('Deviation Gague', cimg)
+
+    # Reset user-input tracking points
     if key == ord('r'):
         tracking_centers = []
         clicked_tracking_pts = []
@@ -120,9 +130,20 @@ while True:
         find_circles()
         cv2.imshow('Deviation Gague', cimg)
 
+    # Evaluate user-input tracking points and apply persp. transform
     if key == ord('e'):
-        eval_features()
+        cimg = eval_features()
+        cv2.imshow('Deviation Gague', cimg)
 
+    # Find countours
+    if key == ord('c'):
+        (contours, hierarchy) = cv2.findContours(cimg, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        with open("contours.txt", "w+") as cont_file:
+            cont_file.write(str(contours))
+            cont_file.flush()
+            cont_file.close()
+
+    # Quit
     if key == ord ('q'):
         break
 
